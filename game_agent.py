@@ -35,7 +35,10 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
+    # raise NotImplementedError
 
 
 def custom_score_2(game, player):
@@ -61,7 +64,9 @@ def custom_score_2(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - 2 * opp_moves)
 
 
 def custom_score_3(game, player):
@@ -112,6 +117,7 @@ class IsolationPlayer:
         positive value large enough to allow the function to return before the
         timer expires.
     """
+
     def __init__(self, search_depth=3, score_fn=custom_score, timeout=10.):
         self.search_depth = search_depth
         self.score = score_fn
@@ -212,8 +218,70 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+    def minimax_ply(self, game, depth, init_move=None, min_max=None):
+        """
+        Helper function for minimax
+        min_max : True for max function and False for min function
+        Returns : (score and the position)
+        """
+
+        # depth is given as argument
+        # while reached depth or leaf nodes reached, fill up all possible moves
+        # get_legal_moves gives a list
+        # Calculate the scores at the leaf or max depth
+        # Apply min-max algorithm at each layer doing depth first
+        # recursively call minimax function to achieve this
+
+        # clever way to use max or min function
+        min_max_func = max if min_max else min
+        best_move = (-1, -1)
+        beta_score = float('-inf')
+        alpha_score = float('inf')
+        # clever way to set value based on max or min function
+        best_score = beta_score if min_max else alpha_score
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            print('timeout')
+            raise SearchTimeout()
+
+        if depth == 0:
+            # reached the ply to calculate score
+            calc_score = self.score(game, self)
+            unit_score = min_max_func([best_score, calc_score])
+            # print('leaf: score {} and move {} min_max: {}'.format( unit_score, init_move, min_max_func))
+            return (unit_score, init_move)
+
+        all_legal_moves = game.get_legal_moves()
+        # print('total moves for {} at depth {} are {} and moves are {}'.format(init_move, depth, len(all_legal_moves), all_legal_moves))
+
+        if not all_legal_moves:
+            print('no moves')
+            return (best_score, best_move)
+
+        # while reached depth or leaf nodes reached, fill up all possible moves
+        for each_move in all_legal_moves:
+            # fore cast move
+            tree_ply = game.forecast_move(each_move)
+            # print(f'current move is {each_move}')
+            # recurse
+            (score, move) = self.minimax_ply(tree_ply,
+                                             depth - 1, each_move, min_max=not min_max)
+            # print('got tuple {} best score is {}', (score, move), best_score)
+            # Check if the score is any better
+            if score != best_score:
+                best_score = min_max_func([score, best_score])
+                if best_score == score:
+                    # change move since it got the better score # fixed bug # was returning move
+                    best_move = each_move
+                    # print('depth {} changed to best move {} and best score {} move {}'.format(depth, best_move, best_score, each_move))
+        pass  # for loop
+        return (best_score, best_move)
+
+        # call the helper function
+        (score, move) = self.minimax_ply(
+            game, depth, init_move=None, min_max=True)
+        # print('score is {} and best move is {}'.format(score, move))
+        return move
 
 
 class AlphaBetaPlayer(IsolationPlayer):

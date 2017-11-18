@@ -195,7 +195,8 @@ class GreedyPlayer():
         legal_moves = game.get_legal_moves()
         if not legal_moves:
             return (-1, -1)
-        _, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+        _, move = max([(self.score(game.forecast_move(m), self), m)
+                       for m in legal_moves])
         return move
 
 
@@ -234,8 +235,9 @@ class HumanPlayer():
         if not legal_moves:
             return (-1, -1)
 
-        print(game.to_string()) #display the board for the human player
-        print(('\t'.join(['[%d] %s' % (i, str(move)) for i, move in enumerate(legal_moves)])))
+        print(game.to_string())  # display the board for the human player
+        print(('\t'.join(['[%d] %s' % (i, str(move))
+                          for i, move in enumerate(legal_moves)])))
 
         valid_choice = False
         while not valid_choice:
