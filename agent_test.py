@@ -17,14 +17,17 @@ class IsolationTest(unittest.TestCase):
 
     def setUp(self):
         reload(game_agent)
-        self.player1 = game_agent.MinimaxPlayer(search_depth=1)
-        self.player2 = sample_players.GreedyPlayer()
+        # self.player1 = game_agent.MinimaxPlayer(search_depth=1)
+        self.player1 = game_agent.AlphaBetaPlayer()
+        # self.player2 = sample_players.GreedyPlayer()
+        self.player2 = game_agent.MinimaxPlayer()
         # self.game = isolation.Board(self.player1, self.player2, 8, 8)
         self.game = isolation.Board(self.player1, self.player2)
 
     def test_minimax(self):
         # print(dir(self.game), self.player1)
         # print(self.game.print_board())
+        # self.player1.get_move(self.game, time_left=10)
         self.game.apply_move((1, 0))
         # print(self.game.print_board())
         # self.player1.get_move(self.game, 100)
