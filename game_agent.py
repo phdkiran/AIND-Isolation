@@ -92,7 +92,15 @@ def custom_score_3(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    w, h = game.width / 2., game.height / 2.
+    y, x = game.get_player_location(player)
+    return float((h - y)**2 + (w - x)**2)
 
 
 class IsolationPlayer:
@@ -328,19 +336,21 @@ class AlphaBetaPlayer(IsolationPlayer):
         # you will end up with best score top down plys
         depth = 1
         # print('ab test get move', self.time_left)
-        while self.time_left() > 0 and depth <= self.search_depth:
-            try:
+        try:
+            # while self.time_left() > 0 and depth <= 25:
+            while self.time_left() > 0:  # no depth limit
+                # and depth <= self.search_depth:
                 best_move = self.alphabeta(game, depth)
-                # increment depth
-                # print('increasing depth in ab test ', depth)
+            # increment depth
+            # print('increasing depth in ab test ', depth)
                 depth += 1
-            except SearchTimeout:
-                print('timed out')
-                break
-        print('best_move is: ', best_move)
+        except SearchTimeout:
+            # print('timed out at depth ', depth)
+            # print('best_move is: ', best_move)
+            pass
         return best_move
 
-    def alphabeta_ply(self, game, depth, init_move=None, min_max=None):
+    def alphabeta_ply(self, game, depth, init_move=None, min_max=None, alpha_score=float('inf'), beta_score=float('-inf')):
         """
         Helper function for minimax
         min_max: True for max function and False for min function
@@ -357,13 +367,11 @@ class AlphaBetaPlayer(IsolationPlayer):
         # clever way to use max or min function
         min_max_func = max if min_max else min
         best_move = (-1, -1)
-        beta_score = float('-inf')
-        alpha_score = float('inf')
         # clever way to set value based on max or min function
         best_score = beta_score if min_max else alpha_score
 
         if self.time_left() < self.TIMER_THRESHOLD:
-            print('timeout')
+            # print('timeout')
             raise SearchTimeout()
 
         if depth == 0:
@@ -377,7 +385,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         # print('total moves for {} at depth {} are {} and moves are {}'.format(init_move, depth, len(all_legal_moves), all_legal_moves))
 
         if not all_legal_moves:
-            print('no moves')
+            # print('no moves')
             return (best_score, best_move)
 
         # while reached depth or leaf nodes reached, fill up all possible moves
@@ -385,9 +393,10 @@ class AlphaBetaPlayer(IsolationPlayer):
             # fore cast move
             tree_ply = game.forecast_move(each_move)
             # print(f'current move is {each_move}')
+            # print(f'best_score {best_score} and alpha {alpha_score} and beta {beta_score} max is {min_max}')
             # recurse
             (score, move) = self.alphabeta_ply(tree_ply,
-                                               depth - 1, each_move, min_max=not min_max)
+                                               depth - 1, each_move, not min_max, alpha_score, beta_score)
             # print('got tuple {} best score is {} and function is {}'.format( (score, move), best_score, min_max_func))
             # Check if the score is any better
             if score != best_score:
@@ -395,8 +404,26 @@ class AlphaBetaPlayer(IsolationPlayer):
                 if best_score == score:
                     # change move since it got the better score # fixed bug # was returning move
                     best_move = each_move
-                    # print('depth {} changed to best move {} and best score {} move {}'.format(depth, best_move, best_score, each_move))
+                    # update alpha beta scores based on the min_max function
+                    # print( f'move {move} score: {best_score} alpha: {alpha_score} beta: {beta_score} ')
+                    if min_max:
+                        # check for pruning
+                        # Max node: score must be >= beta
+                        if best_score >= beta_score:
+                            # print( f'pruning max node score: {best_score} beta: {beta_score} ')
+                            return (best_score, best_move)
+                        alpha_score = max([best_score, alpha_score])
+                    else:
+                        # check for pruning
+                        # Min node: score must be >= alpha
+                        if best_score <= alpha_score:
+                            # print( f'pruning min node score: {best_score} alpha: {alpha_score} ')
+                            return (best_score, best_move)
+                        beta_score = min([best_score, beta_score])
+                    # print('at depth {} alpha {} betas {} '.format(depth, alpha_score, beta_score))
+            # print('depth {} changed to best move {} and best score {} move {}'.format(depth, best_move, best_score, each_move))
         pass  # for loop
+        # print('best move is ', best_move, best_score)
         return (best_score, best_move)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
