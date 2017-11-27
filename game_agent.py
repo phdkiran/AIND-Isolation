@@ -34,11 +34,13 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
+    if game.is_loser(player):
+        return float("-inf")
+    if game.is_winner(player):
+        return float("inf")
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - opp_moves)
-    # raise NotImplementedError
+    return float(own_moves - 2 * opp_moves)
 
 
 def custom_score_2(game, player):
@@ -63,10 +65,14 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
+# get a proportion of the own_moves vs opp_moves
+    if game.is_loser(player):
+        return float("-inf")
+    if game.is_winner(player):
+        return float("inf")
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - 2 * opp_moves)
+    return float(own_moves / opp_moves)
 
 
 def custom_score_3(game, player):
@@ -91,7 +97,7 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
+    # Get center move heuristic
     if game.is_loser(player):
         return float("-inf")
 
@@ -100,7 +106,8 @@ def custom_score_3(game, player):
 
     w, h = game.width / 2., game.height / 2.
     y, x = game.get_player_location(player)
-    return float((h - y)**2 + (w - x)**2)
+    y_, x_ = game.get_player_location(game.get_opponent(player))
+    return float((h - y)**2 + (w - x)**2) - float((h - y_)**2 + (w - x_)**2)
 
 
 class IsolationPlayer:
