@@ -38,9 +38,16 @@ def custom_score(game, player):
         return float("-inf")
     if game.is_winner(player):
         return float("inf")
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves - 2 * opp_moves)
+    moves_own = len(game.get_legal_moves(player))
+    moves_opp = len(game.get_legal_moves(game.get_opponent(player)))
+    board = game.height * game.width
+    moves_board = game.move_count / board
+    move_diff = float(moves_own - moves_opp *
+                      2) if moves_board > 0.33 else (moves_own - moves_opp)
+    pos_own = game.get_player_location(player)
+    pos_opp = game.get_player_location(game.get_opponent(player))
+    m_distance = abs(pos_own[0] - pos_opp[0]) + abs(pos_own[1] - pos_opp[1])
+    return float(move_diff / m_distance)
 
 
 def custom_score_2(game, player):
@@ -229,7 +236,8 @@ class MinimaxPlayer(IsolationPlayer):
 
         if not all_legal_moves:
             # print('no moves')
-            return (best_score, best_move)
+            calc_score = self.score(game, self)
+            return (calc_score, best_move)
 
         # while reached depth or leaf nodes reached, fill up all possible moves
         for each_move in all_legal_moves:
@@ -394,7 +402,8 @@ class AlphaBetaPlayer(IsolationPlayer):
 
         if not all_legal_moves:
             # print('no moves')
-            return (best_score, best_move)
+            calc_score = self.score(game, self)
+            return (calc_score, best_move)
 
         # while reached depth or leaf nodes reached, fill up all possible moves
         for each_move in all_legal_moves:
