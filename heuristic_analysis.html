@@ -1,0 +1,74 @@
+<h1 id="game-agent-report">Game Agent Report</h1>
+<h2 id="author-kiran-ramineni">Author: Kiran Ramineni</h2>
+<p>This report is about heuristic analysis for the isolation game agent. We are playing with one knight piece against an opponent.</p>
+<h4 id="heuristic-1">Heuristic 1</h4>
+<p>This Heuristic is based on hybrid approach by mixing open moves and board position. This metric is also the most complex of the three. It is the most compute intensive during tree traversal.</p>
+<p><em>code:</em></p>
+<pre class="sourceCode python" id="cb1"><code class="sourceCode python"><div class="sourceLine" id="cb1-1" data-line-number="1"></div>
+<div class="sourceLine" id="cb1-2" data-line-number="2">    <span class="cf">if</span> game.is_loser(player):</div>
+<div class="sourceLine" id="cb1-3" data-line-number="3">        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&quot;-inf&quot;</span>)</div>
+<div class="sourceLine" id="cb1-4" data-line-number="4">    <span class="cf">if</span> game.is_winner(player):</div>
+<div class="sourceLine" id="cb1-5" data-line-number="5">        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&quot;inf&quot;</span>)</div>
+<div class="sourceLine" id="cb1-6" data-line-number="6">    moves_own <span class="op">=</span> <span class="bu">len</span>(game.get_legal_moves(player))</div>
+<div class="sourceLine" id="cb1-7" data-line-number="7">    moves_opp <span class="op">=</span> <span class="bu">len</span>(game.get_legal_moves(game.get_opponent(player)))</div>
+<div class="sourceLine" id="cb1-8" data-line-number="8">    board <span class="op">=</span> game.height <span class="op">*</span> game.width</div>
+<div class="sourceLine" id="cb1-9" data-line-number="9">    moves_board <span class="op">=</span> game.move_count <span class="op">/</span> board</div>
+<div class="sourceLine" id="cb1-10" data-line-number="10">    move_diff <span class="op">=</span> <span class="bu">float</span>(moves_own <span class="op">-</span> moves_opp <span class="op">*</span></div>
+<div class="sourceLine" id="cb1-11" data-line-number="11">                      <span class="dv">2</span>) <span class="cf">if</span> moves_board <span class="op">&gt;</span> <span class="fl">0.33</span> <span class="cf">else</span> (moves_own <span class="op">-</span> moves_opp)</div>
+<div class="sourceLine" id="cb1-12" data-line-number="12">    pos_own <span class="op">=</span> game.get_player_location(player)</div>
+<div class="sourceLine" id="cb1-13" data-line-number="13">    pos_opp <span class="op">=</span> game.get_player_location(game.get_opponent(player))</div>
+<div class="sourceLine" id="cb1-14" data-line-number="14">    m_distance <span class="op">=</span> <span class="bu">abs</span>(pos_own[<span class="dv">0</span>] <span class="op">-</span> pos_opp[<span class="dv">0</span>]) <span class="op">+</span> <span class="bu">abs</span>(pos_own[<span class="dv">1</span>] <span class="op">-</span> pos_opp[<span class="dv">1</span>])</div>
+<div class="sourceLine" id="cb1-15" data-line-number="15">    <span class="cf">return</span> <span class="bu">float</span>(move_diff <span class="op">/</span> m_distance)</div></code></pre>
+<h4 id="heuristic-2">Heuristic 2</h4>
+<p>This Heuristic is based on fraction of open moves for the player vs opponent. If the Opponent has two open moves vs one move for the player, the score is 0.5.</p>
+<p><em>code:</em></p>
+<pre class="sourceCode python" id="cb2"><code class="sourceCode python"><div class="sourceLine" id="cb2-1" data-line-number="1">    <span class="cf">if</span> game.is_loser(player):</div>
+<div class="sourceLine" id="cb2-2" data-line-number="2">        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&quot;-inf&quot;</span>)</div>
+<div class="sourceLine" id="cb2-3" data-line-number="3">    <span class="cf">if</span> game.is_winner(player):</div>
+<div class="sourceLine" id="cb2-4" data-line-number="4">        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&quot;inf&quot;</span>)</div>
+<div class="sourceLine" id="cb2-5" data-line-number="5">    own_moves <span class="op">=</span> <span class="bu">len</span>(game.get_legal_moves(player))</div>
+<div class="sourceLine" id="cb2-6" data-line-number="6">    opp_moves <span class="op">=</span> <span class="bu">len</span>(game.get_legal_moves(game.get_opponent(player)))</div>
+<div class="sourceLine" id="cb2-7" data-line-number="7">    <span class="cf">return</span> <span class="bu">float</span>((own_moves <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> (opp_moves <span class="op">+</span> <span class="dv">1</span>))</div></code></pre>
+<h4 id="heuristic-3">Heuristic 3</h4>
+<p>This heuristic is based on the position of the board. It gives weight to being in the center.</p>
+<p><em>code:</em></p>
+<pre class="sourceCode python" id="cb3"><code class="sourceCode python"><div class="sourceLine" id="cb3-1" data-line-number="1">    <span class="cf">if</span> game.is_loser(player):</div>
+<div class="sourceLine" id="cb3-2" data-line-number="2">        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&quot;-inf&quot;</span>)</div>
+<div class="sourceLine" id="cb3-3" data-line-number="3">    <span class="cf">if</span> game.is_winner(player):</div>
+<div class="sourceLine" id="cb3-4" data-line-number="4">        <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&quot;inf&quot;</span>)</div>
+<div class="sourceLine" id="cb3-5" data-line-number="5">    w, h <span class="op">=</span> game.width <span class="op">/</span> <span class="fl">2.</span>, game.height <span class="op">/</span> <span class="fl">2.</span></div>
+<div class="sourceLine" id="cb3-6" data-line-number="6">    y, x <span class="op">=</span> game.get_player_location(player)</div>
+<div class="sourceLine" id="cb3-7" data-line-number="7">    y_, x_ <span class="op">=</span> game.get_player_location(game.get_opponent(player))</div>
+<div class="sourceLine" id="cb3-8" data-line-number="8">    <span class="cf">return</span> <span class="bu">float</span>((h <span class="op">-</span> y)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (w <span class="op">-</span> x)<span class="op">**</span><span class="dv">2</span>) <span class="op">-</span> <span class="bu">float</span>((h <span class="op">-</span> y_)<span class="op">**</span><span class="dv">2</span> <span class="op">+</span> (w <span class="op">-</span> x_)<span class="op">**</span><span class="dv">2</span>)</div></code></pre>
+<h3 id="tournament-results">Tournament results</h3>
+<pre><code>This script evaluates the performance of the custom_score evaluation
+function against a baseline agent using alpha-beta search and iterative
+deepening (ID) called `AB_Improved`. The three `AB_Custom` agents use
+ID and alpha-beta search with the custom_score functions defined in
+game_agent.py.
+
+                        *************************                         
+                             Playing Matches                              
+                        *************************                         
+
+ Match #   Opponent    AB_Improved   AB_Custom   AB_Custom_2  AB_Custom_3 
+                        Won | Lost   Won | Lost   Won | Lost   Won | Lost 
+    1       Random       8  |   2    10  |   0     7  |   3     9  |   1  
+    2       MM_Open      6  |   4     8  |   2     7  |   3     6  |   4  
+    3      MM_Center     8  |   2     9  |   1     8  |   2    10  |   0  
+    4     MM_Improved    7  |   3     7  |   3     6  |   4     3  |   7  
+    5       AB_Open      6  |   4     5  |   5     5  |   5     4  |   6  
+    6      AB_Center     5  |   5     5  |   5     7  |   3     6  |   4  
+    7     AB_Improved    5  |   5     5  |   5     5  |   5     3  |   7  
+--------------------------------------------------------------------------
+           Win Rate:      64.3%        70.0%        64.3%        58.6%    
+
+Your agents forfeited 246.0 games while there were still legal moves available to play.</code></pre>
+<h3 id="various-scoring-metrics">Various scoring metrics</h3>
+<ol type="1">
+<li><em>Complexity</em> : Heuristic 1 &gt; Heuristic 3 &gt; Heuristic 2</li>
+<li><em>Deep traversal</em> : Heuristic 1 &gt; Heuristic 3 = Heuristic 2</li>
+<li><em>Prediction Accuracy</em>: Heuristic 1 &gt; Heuristic 2 &gt; Heuristic 3</li>
+</ol>
+<h3 id="final-recommendation">Final Recommendation</h3>
+<p>From the game report above looks like <em>Heuristic 1</em> beat the AB_Improved metric while <em>Heuristic 2</em> scored same percentage of wins as the AB_Improved metric. Mixing open moves while maintaining board positions seems like a good strategy. Heuristic 1 is the recommended strategy as it consistently beat the AB_Improved baseline metric.</p>
